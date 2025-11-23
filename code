@@ -1,0 +1,85 @@
+-- Create database if not exists
+CREATE DATABASE IF NOT EXISTS mydatabase;
+USE mydatabase;
+
+-- Drop tables if they exist
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS products;
+
+-- Create users table
+CREATE TABLE users (
+    user_id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+-- Create products table
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(50),
+    price INT
+);
+
+-- Create orders table
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    user_id INT,
+    product_id INT,
+    quantity INT
+);
+
+INSERT INTO users VALUES
+(1, 'Asha'),
+(2, 'Rohit'),
+(3, 'Priya');
+
+INSERT INTO products VALUES
+(101, 'Mobile', 15000),
+(102, 'Laptop', 55000),
+(103, 'Headphones', 2000);
+
+INSERT INTO orders VALUES
+(1, 1, 101, 1),
+(2, 1, 103, 2),
+(3, 2, 102, 1),
+(4, 3, 103, 1);
+SELECT * FROM users;
+SELECT * FROM orders WHERE quantity > 1;
+SELECT * FROM products ORDER BY price DESC;
+SELECT user_id, SUM(quantity) AS total_items
+FROM orders
+GROUP BY user_id;
+SELECT u.name, p.product_name
+FROM orders o
+INNER JOIN users u ON o.user_id = u.user_id
+INNER JOIN products p ON o.product_id = p.product_id;
+SELECT u.name, o.order_id
+FROM users u
+LEFT JOIN orders o ON u.user_id = o.user_id;
+SELECT u.name, o.order_id
+FROM users u
+RIGHT JOIN orders o ON u.user_id = o.user_id;
+SELECT name FROM users
+WHERE user_id IN (
+    SELECT user_id
+    FROM orders
+    GROUP BY user_id
+    HAVING SUM(quantity) > 1
+);
+SELECT SUM(p.price * o.quantity) AS total_revenue
+FROM orders o
+JOIN products p ON o.product_id = p.product_id;
+SELECT AVG(p.price * o.quantity) AS avg_revenue
+FROM orders o
+JOIN products p ON o.product_id = p.product_id;
+CREATE VIEW order_summary AS
+SELECT o.order_id,
+       u.name AS customer,
+       p.product_name,
+       (p.price * o.quantity) AS revenue
+FROM orders o
+JOIN users u ON o.user_id = u.user_id
+JOIN products p ON o.product_id = p.product_id;
+SELECT * FROM order_summary;
+CREATE INDEX idx_user_id_2 ON orders(user_id);
+
